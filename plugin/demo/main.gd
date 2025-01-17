@@ -1,7 +1,8 @@
 extends Node2D
 
+@export var video_uri : String = ""
 # TODO: Update to match your plugin's name
-var _plugin_name = "GodotAndroidPluginTemplate"
+var _plugin_name = "godot_exoplayer"
 var _android_plugin
 
 func _ready():
@@ -14,3 +15,9 @@ func _on_Button_pressed():
 	if _android_plugin:
 		# TODO: Update to match your plugin's API
 		_android_plugin.helloWorld()
+
+
+func _on_p_lay_video_button_pressed() -> void:
+	var surface = _android_plugin.createExoPlayerSurface(video_uri)
+	print(surface)
+	pass # Replace with function body.

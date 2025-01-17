@@ -16,5 +16,5 @@ dependencyResolutionManagement {
 }
 
 // TODO: Update project's name.
-rootProject.name = "GodotAndroidPluginTemplate"
+rootProject.name = "godot_exoplayer"
 include(":plugin")
