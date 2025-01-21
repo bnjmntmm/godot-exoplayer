@@ -13,6 +13,7 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
 
     override fun getPluginName() = BuildConfig.GODOT_PLUGIN_NAME
 
+
     // Keep track of multiple ExoPlayer instances by ID.
     private val exoPlayers = mutableMapOf<Int, ExoPlayer>()
 

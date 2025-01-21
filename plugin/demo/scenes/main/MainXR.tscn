@@ -27,7 +27,6 @@ size = Vector3(10, 0.1, 10)
 
 [node name="MainXR" type="Node3D"]
 script = ExtResource("1_j6ddo")
-passthrough = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_lkshg")
@@ -36,14 +35,26 @@ environment = SubResource("Environment_lkshg")
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
 
-[node name="StaticBody3D" type="StaticBody3D" parent="."]
+[node name="Floor" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0315933, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("BoxShape3D_l5qah")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
 mesh = SubResource("BoxMesh_bdica")
 
 [node name="XROrigin3D" parent="." instance=ExtResource("2_be6s4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.129055, 0)
+
+[node name="CompLayer" type="OpenXRCompositionLayerQuad" parent="XROrigin3D"]
+transform = Transform3D(-1, 0, 0, 0, -1, 0, 0, 0, 1, 0, 0.56614, -1.35735)
+use_android_surface = true
+android_surface_size = Vector2i(1920, 1080)
+sort_order = -1
+enable_hole_punch = true
+quad_size = Vector2(1, 0.563)
+
+[editable path="XROrigin3D"]
+[editable path="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2"]
+[editable path="XROrigin3D/RightTrackedHand/RightHandHumanoid2"]
