@@ -47,6 +47,12 @@ mesh = SubResource("BoxMesh_bdica")
 [node name="XROrigin3D" parent="." instance=ExtResource("2_be6s4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.129055, 0)
 
+[node name="BoneAttachment3D" parent="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2/LeftHandHumanoid/Skeleton3D" index="2"]
+transform = Transform3D(0.0148923, 0.3927, 0.919546, -0.993092, 0.112853, -0.0321113, -0.116383, -0.912716, 0.391668, -0.0111001, 0.0429431, -0.171614)
+
+[node name="BoneAttachment3D" parent="XROrigin3D/RightTrackedHand/RightHandHumanoid2/RightHandHumanoid/Skeleton3D" index="2"]
+transform = Transform3D(0.0190384, -0.392689, -0.919474, 0.993227, 0.112853, -0.0276318, 0.114616, -0.912721, 0.392177, 0.0111, 0.042943, -0.171613)
+
 [node name="CompLayer" type="OpenXRCompositionLayerQuad" parent="XROrigin3D"]
 transform = Transform3D(-1, 0, 0, 0, -1, 0, 0, 0, 1, 0, 0.56614, -1.35735)
 use_android_surface = true

@@ -17,13 +17,6 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
     // Keep track of multiple ExoPlayer instances by ID.
     private val exoPlayers = mutableMapOf<Int, ExoPlayer>()
 
-    @UsedByGodot
-    fun helloWorld() {
-        runOnUiThread {
-            Toast.makeText(activity, "Hello World", Toast.LENGTH_LONG).show()
-            Log.v(pluginName, "Hello World")
-        }
-    }
 
     /**
      * Creates or recreates an ExoPlayer instance with a given ID.
@@ -55,7 +48,6 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
                 newExoPlayer.prepare()
 
                 // 5) (Optional) Start playback immediately
-                //    Remove or comment-out if you want to start via `play()`.
                 //newExoPlayer.play()
 
                 // 6) Store in the map

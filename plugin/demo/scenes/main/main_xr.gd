@@ -2,6 +2,7 @@ extends Node3D
 
 
 @export var passthrough : bool = false
+@export var video_uri : String = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
 
 @onready var environment : Environment = $WorldEnvironment.environment
 
@@ -33,15 +34,20 @@ func _ready() -> void:
 	
 	await get_tree().create_timer(3).timeout
 	get_android_surface()
+	
+	### play (id of player)
 	_android_plugin.play(1)
+	
+	## pause ( id of player)
+	## _android_plugin.pause(1)
 
 func get_android_surface():
 	if _android_plugin:
+		## getting the android surface from the composition layer quad
 		var android_surface = $XROrigin3D/CompLayer.get_android_surface()
 		if android_surface:
-			print(android_surface)
-			##create exoplayer
-			_android_plugin.createExoPlayerSurface(1,"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",android_surface)
+			##create exoplayer using android plugin function
+			_android_plugin.createExoPlayerSurface(1,video_uri,android_surface)
 		
 
 func enable_passthrough():
