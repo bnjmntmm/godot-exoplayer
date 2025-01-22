@@ -1,13 +1,30 @@
 package org.godotengine.plugin.android.godot_exoplayer
 
+import android.content.Context
 import android.util.Log
 import android.view.Surface
 import android.widget.Toast
+import androidx.annotation.OptIn
+import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DecoderReuseEvaluation
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.Renderer
+import androidx.media3.exoplayer.RenderersFactory
+import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.audio.AudioCapabilities
+import androidx.media3.exoplayer.audio.DefaultAudioSink
+import androidx.media3.exoplayer.audio.MediaCodecAudioRenderer
+import androidx.media3.exoplayer.audio.TeeAudioProcessor
+import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.UsedByGodot
+import java.nio.ByteBuffer
 
 class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
 
@@ -18,6 +35,7 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
     private val exoPlayers = mutableMapOf<Int, ExoPlayer>()
 
 
+
     /**
      * Creates or recreates an ExoPlayer instance with a given ID.
      *
@@ -25,32 +43,41 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
      * @param videoUri The URI of the video to play.
      * @param surface  The Android Surface to render video onto (provided from Godot).
      */
+
+    //needs to be unstable or else there will be red underlines lul
+    @OptIn(UnstableApi::class)
     @UsedByGodot
     fun createExoPlayerSurface(id: Int, videoUri: String, surface: Surface) {
         runOnUiThread {
             try {
                 // 1) If an ExoPlayer already exists for this id, release it first
                 exoPlayers[id]?.release()
+//                audioExtractors[id]?.reset()
 
-                // 2) Create a new ExoPlayer
-                val newExoPlayer = activity?.let { ExoPlayer.Builder(it).build() }
+
+
+                // 3) Create a new ExoPlayer and use the audiosink
+                val newExoPlayer = activity?.let { ctx ->
+                    ExoPlayer.Builder(ctx)
+                        .setRenderersFactory(GodotRendererFactory(ctx))
+                        .build()
+                }
                 if (newExoPlayer == null) {
                     Log.e(pluginName, "Failed to create ExoPlayer for id $id")
                     return@runOnUiThread
                 }
-
-                // 3) Assign the provided Surface
+                // 4) Assign the provided Surface
                 newExoPlayer.setVideoSurface(surface)
 
-                // 4) Prepare the media
+                // 5) Prepare the media
                 val mediaItem = MediaItem.fromUri(videoUri)
                 newExoPlayer.setMediaItem(mediaItem)
                 newExoPlayer.prepare()
 
-                // 5) (Optional) Start playback immediately
+                // 6) (Optional) Start playback immediately
                 //newExoPlayer.play()
 
-                // 6) Store in the map
+                // 7) Store in the map
                 exoPlayers[id] = newExoPlayer
 
                 Log.v(pluginName, "ExoPlayer($id) created and set up with video: $videoUri")
