@@ -1,0 +1,92 @@
+[gd_resource type="Resource" script_class="HandPose" load_steps=12 format=3 uid="uid://dhbqusuodrl3r"]
+
+[ext_resource type="Script" uid="uid://2a6hfk5auwcs" path="res://addons/hand_pose_detector/fitness_function.gd" id="2_jupks"]
+[ext_resource type="Script" uid="uid://bvnna53jcel41" path="res://addons/hand_pose_detector/hand_pose.gd" id="2_ykawg"]
+
+[sub_resource type="Resource" id="Resource_7pxg4"]
+script = ExtResource("2_jupks")
+type = 0
+min = 0.0
+from = 60.0
+to = 80.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_1fcsh"]
+script = ExtResource("2_jupks")
+type = 0
+min = 0.0
+from = 80.0
+to = 110.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_xvjny"]
+script = ExtResource("2_jupks")
+type = 0
+min = 0.0
+from = 80.0
+to = 110.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_yjd2j"]
+script = ExtResource("2_jupks")
+type = 0
+min = 0.0
+from = 80.0
+to = 110.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_j5qa6"]
+script = ExtResource("2_jupks")
+type = 0
+min = 0.0
+from = 30.0
+to = 45.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_rmm3v"]
+script = ExtResource("2_jupks")
+type = 0
+min = 0.0
+from = 40.0
+to = 60.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_bmko8"]
+script = ExtResource("2_jupks")
+type = 0
+min = 0.0
+from = 40.0
+to = 60.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_crwu0"]
+script = ExtResource("2_jupks")
+type = 0
+min = 0.0
+from = 40.0
+to = 60.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_nb4va"]
+script = ExtResource("2_jupks")
+type = 0
+min = 0.0
+from = 40.0
+to = 60.0
+max = 0.0
+
+[resource]
+script = ExtResource("2_ykawg")
+pose_name = "Fist"
+threshold = 0.3
+hold_time = 0.2
+release_time = 0.2
+flexion_thumb = SubResource("Resource_nb4va")
+flexion_index = SubResource("Resource_j5qa6")
+flexion_middle = SubResource("Resource_rmm3v")
+flexion_ring = SubResource("Resource_crwu0")
+flexion_pinky = SubResource("Resource_bmko8")
+curl_index = SubResource("Resource_7pxg4")
+curl_middle = SubResource("Resource_1fcsh")
+curl_ring = SubResource("Resource_yjd2j")
+curl_pinky = SubResource("Resource_xvjny")

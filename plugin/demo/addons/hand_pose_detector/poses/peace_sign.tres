@@ -1,0 +1,83 @@
+[gd_resource type="Resource" script_class="HandPose" load_steps=11 format=3 uid="uid://dgl2b6ftbpnrx"]
+
+[ext_resource type="Script" path="res://addons/hand_pose_detector/fitness_function.gd" id="2_da60p"]
+[ext_resource type="Script" path="res://addons/hand_pose_detector/hand_pose.gd" id="2_k3pua"]
+
+[sub_resource type="Resource" id="Resource_nwbit"]
+script = ExtResource("2_da60p")
+type = 0
+min = 0.0
+from = 5.0
+to = 10.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_2q7g8"]
+script = ExtResource("2_da60p")
+type = 0
+min = 0.0
+from = 45.0
+to = 35.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_13337"]
+script = ExtResource("2_da60p")
+type = 0
+min = 0.0
+from = 45.0
+to = 35.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_0wa5f"]
+script = ExtResource("2_da60p")
+type = 0
+min = 0.0
+from = 45.0
+to = 35.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_dj0e2"]
+script = ExtResource("2_da60p")
+type = 0
+min = 0.0
+from = 45.0
+to = 35.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_86bkr"]
+script = ExtResource("2_da60p")
+type = 0
+min = 0.0
+from = 30.0
+to = 40.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_5vwoy"]
+script = ExtResource("2_da60p")
+type = 0
+min = 0.0
+from = 30.0
+to = 40.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_21fsw"]
+script = ExtResource("2_da60p")
+type = 0
+min = 0.0
+from = 80.0
+to = 100.0
+max = 0.0
+
+[resource]
+script = ExtResource("2_k3pua")
+pose_name = "Peace Sign"
+threshold = 0.3
+hold_time = 0.2
+release_time = 0.2
+flexion_thumb = SubResource("Resource_21fsw")
+flexion_index = SubResource("Resource_0wa5f")
+flexion_middle = SubResource("Resource_dj0e2")
+flexion_ring = SubResource("Resource_5vwoy")
+flexion_pinky = SubResource("Resource_86bkr")
+curl_index = SubResource("Resource_2q7g8")
+curl_middle = SubResource("Resource_13337")
+abduction_index_middle = SubResource("Resource_nwbit")

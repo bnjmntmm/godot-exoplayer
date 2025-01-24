@@ -1,0 +1,128 @@
+[gd_resource type="Resource" script_class="HandPose" load_steps=16 format=3 uid="uid://xghyj4mh4av2"]
+
+[ext_resource type="Script" path="res://addons/hand_pose_detector/hand_pose.gd" id="2_agcwt"]
+[ext_resource type="Script" path="res://addons/hand_pose_detector/fitness_function.gd" id="2_m5nkn"]
+
+[sub_resource type="Resource" id="Resource_kwbgf"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 15.0
+to = 8.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_cl7xr"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 5.0
+to = 8.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_aow7q"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 15.0
+to = 8.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_fftjn"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 20.0
+to = 10.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_5jsnb"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 20.0
+to = 10.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_e6jab"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 20.0
+to = 10.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_koxyu"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 20.0
+to = 10.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_v3608"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 20.0
+to = 10.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_vih3q"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 40.0
+to = 30.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_s4kcy"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 40.0
+to = 30.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_d8otj"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 40.0
+to = 30.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_jquxv"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 40.0
+to = 30.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_o7ite"]
+script = ExtResource("2_m5nkn")
+type = 0
+min = 0.0
+from = 70.0
+to = 50.0
+max = 0.0
+
+[resource]
+script = ExtResource("2_agcwt")
+pose_name = "Spock"
+threshold = 0.3
+hold_time = 0.2
+release_time = 0.2
+flexion_thumb = SubResource("Resource_o7ite")
+flexion_index = SubResource("Resource_vih3q")
+flexion_middle = SubResource("Resource_s4kcy")
+flexion_ring = SubResource("Resource_jquxv")
+flexion_pinky = SubResource("Resource_d8otj")
+curl_thumb = SubResource("Resource_v3608")
+curl_index = SubResource("Resource_fftjn")
+curl_middle = SubResource("Resource_5jsnb")
+curl_ring = SubResource("Resource_koxyu")
+curl_pinky = SubResource("Resource_e6jab")
+abduction_index_middle = SubResource("Resource_kwbgf")
+abduction_middle_ring = SubResource("Resource_cl7xr")
+abduction_ring_pinky = SubResource("Resource_aow7q")

@@ -1,0 +1,65 @@
+[gd_resource type="Resource" script_class="HandPose" load_steps=9 format=3 uid="uid://sy66yqr1xila"]
+
+[ext_resource type="Script" path="res://addons/hand_pose_detector/hand_pose.gd" id="2_khw5p"]
+[ext_resource type="Script" path="res://addons/hand_pose_detector/fitness_function.gd" id="2_p44rq"]
+
+[sub_resource type="Resource" id="Resource_p1kvp"]
+script = ExtResource("2_p44rq")
+type = 0
+min = 0.0
+from = 70.0
+to = 120.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_k683o"]
+script = ExtResource("2_p44rq")
+type = 0
+min = 0.0
+from = 70.0
+to = 120.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_xp7ni"]
+script = ExtResource("2_p44rq")
+type = 0
+min = 0.0
+from = 70.0
+to = 120.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_jjfjl"]
+script = ExtResource("2_p44rq")
+type = 0
+min = 0.0
+from = 70.0
+to = 120.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_tv1jx"]
+script = ExtResource("2_p44rq")
+type = 0
+min = 0.0
+from = 25.0
+to = 10.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_p5lrn"]
+script = ExtResource("2_p44rq")
+type = 0
+min = 0.0
+from = 50.0
+to = 20.0
+max = 0.0
+
+[resource]
+script = ExtResource("2_khw5p")
+pose_name = "ThumbsUp"
+threshold = 0.3
+hold_time = 0.2
+release_time = 0.2
+flexion_thumb = SubResource("Resource_p5lrn")
+curl_thumb = SubResource("Resource_tv1jx")
+curl_index = SubResource("Resource_p1kvp")
+curl_middle = SubResource("Resource_k683o")
+curl_ring = SubResource("Resource_jjfjl")
+curl_pinky = SubResource("Resource_xp7ni")

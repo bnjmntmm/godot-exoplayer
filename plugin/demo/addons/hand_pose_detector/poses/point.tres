@@ -1,0 +1,56 @@
+[gd_resource type="Resource" script_class="HandPose" load_steps=8 format=3 uid="uid://ceofxcl7q122"]
+
+[ext_resource type="Script" uid="uid://bvnna53jcel41" path="res://addons/hand_pose_detector/hand_pose.gd" id="2_fvjog"]
+[ext_resource type="Script" uid="uid://2a6hfk5auwcs" path="res://addons/hand_pose_detector/fitness_function.gd" id="2_kgqxd"]
+
+[sub_resource type="Resource" id="Resource_5lwnk"]
+script = ExtResource("2_kgqxd")
+type = 0
+min = 0.0
+from = 45.0
+to = 25.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_ni4th"]
+script = ExtResource("2_kgqxd")
+type = 0
+min = 0.0
+from = 80.0
+to = 110.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_ngpot"]
+script = ExtResource("2_kgqxd")
+type = 0
+min = 0.0
+from = 80.0
+to = 110.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_kbi8m"]
+script = ExtResource("2_kgqxd")
+type = 0
+min = 0.0
+from = 80.0
+to = 110.0
+max = 0.0
+
+[sub_resource type="Resource" id="Resource_3xngl"]
+script = ExtResource("2_kgqxd")
+type = 0
+min = 0.0
+from = 40.0
+to = 20.0
+max = 0.0
+
+[resource]
+script = ExtResource("2_fvjog")
+pose_name = "Point"
+threshold = 0.3
+hold_time = 0.2
+release_time = 0.2
+flexion_index = SubResource("Resource_3xngl")
+curl_index = SubResource("Resource_5lwnk")
+curl_middle = SubResource("Resource_ni4th")
+curl_ring = SubResource("Resource_kbi8m")
+curl_pinky = SubResource("Resource_ngpot")
