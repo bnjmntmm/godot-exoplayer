@@ -3,33 +3,30 @@ package org.godotengine.plugin.android.godot_exoplayer
 import android.content.Context
 import android.util.Log
 import android.view.Surface
-import android.widget.Toast
 import androidx.annotation.OptIn
-import androidx.media3.common.Format
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.DecoderReuseEvaluation
-import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.Renderer
-import androidx.media3.exoplayer.RenderersFactory
-import androidx.media3.exoplayer.analytics.AnalyticsListener
-import androidx.media3.exoplayer.audio.AudioCapabilities
-import androidx.media3.exoplayer.audio.DefaultAudioSink
-import androidx.media3.exoplayer.audio.MediaCodecAudioRenderer
-import androidx.media3.exoplayer.audio.TeeAudioProcessor
-import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
+import org.godotengine.godot.plugin.SignalInfo
 import org.godotengine.godot.plugin.UsedByGodot
-import java.nio.ByteBuffer
 
 class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
 
     override fun getPluginName() = BuildConfig.GODOT_PLUGIN_NAME
 
+    // Updated signal declaration with parameters
+    override fun getPluginSignals(): MutableSet<SignalInfo> {
+        return mutableSetOf(
+            SignalInfo("on_player_ready", Integer::class.java, Integer::class.java),
+            SignalInfo("on_video_end", Integer::class.java),
+            SignalInfo("on_player_error", Integer::class.java, String::class.java)
+        )
+    }
 
     // Keep track of multiple ExoPlayer instances by ID.
     private val exoPlayers = mutableMapOf<Int, ExoPlayer>()
@@ -64,10 +61,12 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
                 }
                 if (newExoPlayer == null) {
                     Log.e(pluginName, "Failed to create ExoPlayer for id $id")
+                    emitSignal("on_player_error", "Failed to create ExoPlayer for id $id")
                     return@runOnUiThread
                 }
                 // 4) Assign the provided Surface
                 newExoPlayer.setVideoSurface(surface)
+                newExoPlayer.addListener(createPlayerListener(id))
 
                 // 5) Prepare the media
                 val mediaItem = MediaItem.fromUri(videoUri)
@@ -84,6 +83,7 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
 
             } catch (e: Exception) {
                 Log.e(pluginName, "Error creating ExoPlayer($id): ${e.message}")
+                emitSignal("on_video_error", "Error creating ExoPlayer($id): ${e.message}")
             }
         }
     }
@@ -109,6 +109,65 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
     }
 
     /**
+     * Seek to a specific position in the ExoPlayer with the given ID.
+     */
+    @UsedByGodot
+    fun seekTo(id: Int, positionMs: Long){
+        runOnUiThread{
+            exoPlayers[id]?.seekTo(positionMs) ?: Log.e(pluginName, "ExoPlayer($id) not found when attempting to seek")
+        }
+    }
+
+
+    /**
+     * Seek by a specific amount of time in the ExoPlayer with the given ID.
+     */
+    @UsedByGodot
+    fun seekBy(id: Int, deltaMs: Long) {
+        runOnUiThread {
+            val player = exoPlayers[id] ?: run {
+                Log.e(pluginName, "ExoPlayer($id) not found for seekBy")
+                return@runOnUiThread
+            }
+            val current = player.currentPosition
+            val duration = player.duration
+            val newPosition = if (duration != androidx.media3.common.C.TIME_UNSET) {
+                (current + deltaMs).coerceIn(0, duration)
+            } else {
+                (current + deltaMs).coerceAtLeast(0)
+            }
+            player.seekTo(newPosition)
+        }
+    }
+
+    /**
+     * Returns the playback position in the current content or ad,
+     * in milliseconds, or the prospective position in milliseconds
+     */
+
+    @UsedByGodot
+    fun getCurrentPosition(id: Int): Long {
+        return exoPlayers[id]?.currentPosition ?: -1
+    }
+
+    /**
+     * Returns the duration of the current content or ad in milliseconds
+     * , or C. TIME_UNSET if the duration is not known.
+     */
+    @UsedByGodot
+    fun getDuration(id: Int): Float {
+        return exoPlayers[id]?.let { player ->
+            if (player.playbackState == Player.STATE_READY && player.duration != androidx.media3.common.C.TIME_UNSET) {
+                player.duration.toFloat()
+            } else {
+                -1f
+            }
+        } ?: -1f
+    }
+
+
+
+    /**
      * Optional: Stop or release a specific ExoPlayer instance.
      * This is useful if you want to free resources for one player but keep others running.
      */
@@ -121,6 +180,37 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
                 Log.v(pluginName, "ExoPlayer($id) released and removed.")
             } ?: Log.e(pluginName, "ExoPlayer($id) not found when attempting to release")
         }
+    }
+
+    private fun createPlayerListener(id:Int) = object : Player.Listener{
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            when(playbackState) {
+                Player.STATE_READY -> {
+                    exoPlayers[id]?.let { player ->
+                        val duration =
+                            if (player.duration == C.TIME_UNSET) -1 else player.duration
+                        Log.v(pluginName, "ExoPlayer($id) ready, duration: $duration")
+                        emitSignal("on_player_ready", id, duration.toInt())
+                    }
+                }
+
+                Player.STATE_ENDED -> {
+                    emitSignal("on_video_end", id)
+                }
+
+                Player.STATE_BUFFERING -> {
+                    Log.v(pluginName, "ExoPlayer($id) buffering")
+                }
+
+                Player.STATE_IDLE -> {
+                    Log.v(pluginName, "ExoPlayer($id) idle")
+                }
+            }
+        }
+        override fun onPlayerError(error: PlaybackException) {
+            emitSignal("on_player_error", id, error.message)
+        }
+
     }
 
     /**

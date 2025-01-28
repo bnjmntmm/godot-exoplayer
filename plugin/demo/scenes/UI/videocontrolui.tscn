@@ -1,0 +1,86 @@
+[gd_scene load_steps=5 format=3 uid="uid://dacutnkwxu6d7"]
+
+[ext_resource type="Script" uid="uid://bqtm4e5x4may7" path="res://scenes/UI/videocontrolui.gd" id="1_o00lp"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xq4ey"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o00lp"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nalb1"]
+
+[node name="VideoControlUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_o00lp")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -51.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="VSeparator2" type="VSeparator" parent="VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_xq4ey")
+
+[node name="Timeline" type="HSlider" parent="VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="VSeparator" type="VSeparator" parent="VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_o00lp")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="PlayPauseButton" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Play"
+
+[node name="VSeparator" type="VSeparator" parent="VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 50
+theme_override_styles/separator = SubResource("StyleBoxEmpty_nalb1")
+
+[node name="PlusTenButton" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "+10s"
+
+[node name="MinusTenButton" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "-10s"
+
+[node name="ErrorLabel" type="Label" parent="VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[connection signal="value_changed" from="VBoxContainer/HBoxContainer2/Timeline" to="." method="_on_timeline_value_changed"]
+[connection signal="pressed" from="VBoxContainer/MarginContainer/HBoxContainer/PlayPauseButton" to="." method="_on_play_pause_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/MarginContainer/HBoxContainer/PlusTenButton" to="." method="_on_plus_ten_button_pressed"]
+[connection signal="button_up" from="VBoxContainer/MarginContainer/HBoxContainer/MinusTenButton" to="." method="_on_minus_ten_button_button_up"]

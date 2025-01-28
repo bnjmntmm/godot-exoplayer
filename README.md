@@ -26,7 +26,6 @@ This repository explores the integration of ExoPlayer with Godot Engine 4.4. The
 2. Build the Addon yourself using Android Studio and Gradle or use the prebuilt inside from [godot_exoplayer](plugin%2Fdemo%2Faddons%2Fgodot_exoplayer)
 3. Test out the demo in [main](plugin%2Fdemo%2Fscenes%2Fmain)
 
-
 ### Usage
 1. Enable the Plugin: Activate the ExoPlayer plugin in your Godot project settings.
 2. Surface Binding: Create a OpenXRCompositionLayer and select `use_android_surface`.
@@ -34,12 +33,16 @@ This repository explores the integration of ExoPlayer with Godot Engine 4.4. The
 4. Pass the Surface to ExoPlayer using the `createExoPlayerSurface(id: int, videoUri : String ,surface: Surface)` method.#
 5. Play the video using the `play(id: int)` method.
 
-
 ### Limitations
 - Currently experimental and may contain bugs or incomplete features.
 - Only supports Android platforms.
 - May lack complete documentation and features
 - Only supports Version 4.4 and onwards (hopefully)
 
+
+### Used Addons
+- 
+
 ### Contributing
 Contributions are welcome! If you encounter issues or have suggestions, feel free to open an issue or submit a pull request. As this is an experimental project, active collaboration will help shape its development.
+
