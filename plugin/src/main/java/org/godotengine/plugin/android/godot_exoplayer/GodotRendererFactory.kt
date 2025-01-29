@@ -37,7 +37,6 @@ class GodotRendererFactory(private val context: Context) : RenderersFactory {
         // Create audio sink with our processor
         val customAudioSink = DefaultAudioSink.Builder()
             .setAudioProcessors(arrayOf(teeProcessor))
-            .setAudioCapabilities(AudioCapabilities.getCapabilities(context))
             .build()
 
         // Add audio renderer

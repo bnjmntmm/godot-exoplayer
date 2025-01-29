@@ -66,6 +66,15 @@ func getVideoDuration(id):
 	if is_player_ready(id):
 		return players[id].duration
 	return -1.0
+	
+func setPlayerVolume(id: int, volume: float):
+	if _android_plugin:
+		_android_plugin.setVolume(id, volume)
+func getPlayerVolume(id:int):
+	if _android_plugin:
+		return _android_plugin.getVolume(id)
+		
+
 #endregion
 		
 #region Helpers

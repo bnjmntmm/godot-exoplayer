@@ -108,6 +108,30 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
         }
     }
 
+
+    /**
+     * Set the volume of the ExoPlayer with the given ID.
+     */
+    @UsedByGodot
+    fun setVolume(id: Int, volume: Float){
+        runOnUiThread{
+            val player = exoPlayers[id]
+            if (player == null) {
+                Log.e(pluginName, "ExoPlayer($id) not found when attempting to setVolume")
+                return@runOnUiThread
+            }
+            val clampedVolume = volume.coerceIn(0f, 1f)
+            player.volume = clampedVolume
+        }
+    }
+    /**
+     * Get the Volume of the ExoPlayer with the given ID.
+     */
+    @UsedByGodot
+    fun getVolume(id: Int): Float {
+        return exoPlayers[id]?.volume ?: -1f
+    }
+
     /**
      * Seek to a specific position in the ExoPlayer with the given ID.
      */

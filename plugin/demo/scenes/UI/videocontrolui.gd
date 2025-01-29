@@ -8,6 +8,7 @@ var videoPaused : bool = true
 @onready var timeline: HSlider = $VBoxContainer/HBoxContainer2/Timeline
 @onready var play_pause_button: Button = $VBoxContainer/MarginContainer/HBoxContainer/PlayPauseButton
 @onready var error_label: Label = $VBoxContainer/MarginContainer/HBoxContainer/ErrorLabel
+@onready var volume_slider: HSlider = $VBoxContainer/MarginContainer/HBoxContainer2/VolumeSlider
 
 func setup_video_controls(exoplayer_id: int, duration) -> void:
 	update_ui_state(false)
@@ -25,6 +26,7 @@ func _on_player_ready(id: int, duration: int) -> void:
 		timeline.max_value = duration / 1000.0 ## dividing because we want seconds
 		update_ui_state(true)
 		error_label.hide()
+		#volume_slider.value = ExoPlayer.getPlayerVolume(currently_attached_id)
 	pass
 	
 func _on_player_error(id: int, error_code: int, error_message : String) -> void:
@@ -42,6 +44,13 @@ func show_error(message: String) -> void:
 	error_label.text = message
 	error_label.show()
 #endregion
+
+### function to set the current value while playing
+func _on_timeline_timer_timeout() -> void:
+	if not videoPaused:
+		var current_time = ExoPlayer.getCurrentPlaybackPosition(currently_attached_id) / 1000.0
+		_on_timeline_value_changed(current_time)
+
 
 func _on_timeline_value_changed(value: float) -> void:
 	## we need to use seekTo but multiply by 1000 for ms
@@ -66,3 +75,7 @@ func _on_plus_ten_button_pressed() -> void:
 
 func _on_minus_ten_button_button_up() -> void:
 	ExoPlayer.seekBy(currently_attached_id,-10000)
+
+
+func _on_volume_slider_value_changed(value: float) -> void:
+	ExoPlayer.setPlayerVolume(currently_attached_id, value)
