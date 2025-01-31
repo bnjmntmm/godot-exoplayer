@@ -14,6 +14,7 @@ import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.SignalInfo
 import org.godotengine.godot.plugin.UsedByGodot
+import java.util.concurrent.CountDownLatch
 
 class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
 
@@ -171,8 +172,18 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
 
     @UsedByGodot
     fun getCurrentPosition(id: Int): Long {
-        return exoPlayers[id]?.currentPosition ?: -1
+        return runCatching {
+            var currentPosition: Long = -1
+            val latch = CountDownLatch(1)
+            runOnUiThread {
+                currentPosition = exoPlayers[id]?.currentPosition ?: -1
+                latch.countDown()
+            }
+            latch.await() // Wait until the UI thread completes the operation
+            currentPosition
+        }.getOrElse { -1 }
     }
+
 
     /**
      * Returns the duration of the current content or ad in milliseconds

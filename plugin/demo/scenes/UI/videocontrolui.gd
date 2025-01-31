@@ -2,9 +2,12 @@ extends Control
 
 var currently_attached_id : int
 var videoDuration : float = 0
-
 var videoPaused : bool = true
+var isMute : bool = false
+var prevVolume : float = 1.0
 
+
+@onready var timeline_timer: Timer = $VBoxContainer/HBoxContainer2/Timeline/TimelineTimer
 @onready var timeline: HSlider = $VBoxContainer/HBoxContainer2/Timeline
 @onready var play_pause_button: Button = $VBoxContainer/MarginContainer/HBoxContainer/PlayPauseButton
 @onready var error_label: Label = $VBoxContainer/MarginContainer/HBoxContainer/ErrorLabel
@@ -49,7 +52,10 @@ func show_error(message: String) -> void:
 func _on_timeline_timer_timeout() -> void:
 	if not videoPaused:
 		var current_time = ExoPlayer.getCurrentPlaybackPosition(currently_attached_id) / 1000.0
-		_on_timeline_value_changed(current_time)
+		timeline.set_block_signals(true)
+		timeline.value = lerp(timeline.value, current_time, 0.3)
+		timeline.set_block_signals(false)
+		
 
 
 func _on_timeline_value_changed(value: float) -> void:
@@ -60,9 +66,11 @@ func _on_timeline_value_changed(value: float) -> void:
 func _on_play_pause_button_pressed() -> void:
 	if videoPaused:
 		ExoPlayer.play(currently_attached_id)
+		timeline_timer.start(0.0)
 		play_pause_button.text = "Pause"
 		videoPaused = false
 	else:
+		timeline_timer.stop()
 		ExoPlayer.pause(currently_attached_id)
 		play_pause_button.text = "Play"
 		videoPaused = true
@@ -79,3 +87,11 @@ func _on_minus_ten_button_button_up() -> void:
 
 func _on_volume_slider_value_changed(value: float) -> void:
 	ExoPlayer.setPlayerVolume(currently_attached_id, value)
+func _on_mute_button_pressed() -> void:
+	if not isMute:
+		isMute = true
+		prevVolume = volume_slider.value
+		volume_slider.value = 0
+	else:
+		isMute = false
+		volume_slider.value = prevVolume

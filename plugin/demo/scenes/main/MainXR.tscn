@@ -56,15 +56,16 @@ transform = Transform3D(0.0148923, 0.3927, 0.919546, -0.993092, 0.112853, -0.032
 transform = Transform3D(0.0190384, -0.392689, -0.919474, 0.993227, 0.112853, -0.0276318, 0.114616, -0.912721, 0.392177, 0.0111, 0.042943, -0.171613)
 
 [node name="CompLayer" type="OpenXRCompositionLayerQuad" parent="XROrigin3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.04548, -0.469709)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.04548, -0.922102)
 use_android_surface = true
 android_surface_size = Vector2i(1920, 1080)
 sort_order = -1
 enable_hole_punch = true
+quad_size = Vector2(1.6, 0.9)
 
 [node name="VideoControls2DIn3D" parent="XROrigin3D/CompLayer" instance=ExtResource("3_cbtg8")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.223485, 0.00347269)
-screen_size = Vector2(1, 0.55)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.184881, 0.00299996)
+screen_size = Vector2(1.6, 0.9)
 collision_layer = 5242880
 scene = ExtResource("4_t3k56")
 viewport_size = Vector2(480, 270)

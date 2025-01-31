@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://dacutnkwxu6d7"]
+[gd_scene load_steps=6 format=3 uid="uid://dacutnkwxu6d7"]
 
 [ext_resource type="Script" uid="uid://bqtm4e5x4may7" path="res://scenes/UI/videocontrolui.gd" id="1_o00lp"]
 
@@ -8,6 +8,9 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nalb1"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o00lp"]
+bg_color = Color(1, 0, 0, 1)
+
 [node name="VideoControlUI" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -16,6 +19,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_o00lp")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -54.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(1, 1, 1, 0.411765)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -41,7 +55,6 @@ size_flags_horizontal = 3
 size_flags_vertical = 4
 
 [node name="TimelineTimer" type="Timer" parent="VBoxContainer/HBoxContainer2/Timeline"]
-wait_time = 0.1
 
 [node name="VSeparator" type="VSeparator" parent="VBoxContainer/HBoxContainer2"]
 layout_mode = 2
@@ -70,15 +83,15 @@ layout_mode = 2
 theme_override_constants/separation = 50
 theme_override_styles/separator = SubResource("StyleBoxEmpty_nalb1")
 
-[node name="PlusTenButton" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "+10s"
-
 [node name="MinusTenButton" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "-10s"
+
+[node name="PlusTenButton" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "+10s"
 
 [node name="ErrorLabel" type="Label" parent="VBoxContainer/MarginContainer/HBoxContainer"]
 layout_mode = 2
@@ -87,10 +100,12 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 8
 
-[node name="Button" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer2"]
+[node name="MuteButton" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer2"]
 layout_mode = 2
 size_flags_horizontal = 6
 size_flags_vertical = 4
+theme_override_styles/pressed = SubResource("StyleBoxFlat_o00lp")
+toggle_mode = true
 text = "Mute"
 
 [node name="VSeparator" type="VSeparator" parent="VBoxContainer/MarginContainer/HBoxContainer2"]
@@ -105,10 +120,12 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 max_value = 1.0
 step = 0.1
+value = 1.0
 
 [connection signal="value_changed" from="VBoxContainer/HBoxContainer2/Timeline" to="." method="_on_timeline_value_changed"]
 [connection signal="timeout" from="VBoxContainer/HBoxContainer2/Timeline/TimelineTimer" to="." method="_on_timeline_timer_timeout"]
 [connection signal="pressed" from="VBoxContainer/MarginContainer/HBoxContainer/PlayPauseButton" to="." method="_on_play_pause_button_pressed"]
-[connection signal="pressed" from="VBoxContainer/MarginContainer/HBoxContainer/PlusTenButton" to="." method="_on_plus_ten_button_pressed"]
 [connection signal="button_up" from="VBoxContainer/MarginContainer/HBoxContainer/MinusTenButton" to="." method="_on_minus_ten_button_button_up"]
+[connection signal="pressed" from="VBoxContainer/MarginContainer/HBoxContainer/PlusTenButton" to="." method="_on_plus_ten_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/MarginContainer/HBoxContainer2/MuteButton" to="." method="_on_mute_button_pressed"]
 [connection signal="value_changed" from="VBoxContainer/MarginContainer/HBoxContainer2/VolumeSlider" to="." method="_on_volume_slider_value_changed"]

@@ -15,7 +15,7 @@ class GodotAudioSink : TeeAudioProcessor.AudioBufferSink {
             val arr = ByteArray(buffer.remaining())
             buffer.get(arr)
             // TODO: Send arr to Godot here
-            Log.d("GodotAudioSink", "Received audio buffer of size: ${arr.size}, first byte: ${arr[0]}")
+            //Log.d("GodotAudioSink", "Received audio buffer of size: ${arr.size}, first byte: ${arr[0]}")
         } catch (exception: Exception) {
             Log.e("GodotAudioSink", "Error handling audio buffer: ${exception.message}")
         }
