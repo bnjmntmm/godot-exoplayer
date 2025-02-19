@@ -29,6 +29,7 @@ size = Vector3(10, 0.1, 10)
 
 [node name="MainXR" type="Node3D"]
 script = ExtResource("1_j6ddo")
+video_uri = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_lkshg")
@@ -64,11 +65,11 @@ enable_hole_punch = true
 quad_size = Vector2(1.6, 0.9)
 
 [node name="VideoControls2DIn3D" parent="XROrigin3D/CompLayer" instance=ExtResource("3_cbtg8")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.184881, 0.00299996)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.113051, 0.00299996)
 screen_size = Vector2(1.6, 0.9)
 collision_layer = 5242880
 scene = ExtResource("4_t3k56")
-viewport_size = Vector2(480, 270)
+viewport_size = Vector2(800, 450)
 scene_properties_keys = PackedStringArray("videocontrolui.gd")
 
 [editable path="XROrigin3D"]

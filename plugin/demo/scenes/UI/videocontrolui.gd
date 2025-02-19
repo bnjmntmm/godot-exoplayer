@@ -95,3 +95,7 @@ func _on_mute_button_pressed() -> void:
 	else:
 		isMute = false
 		volume_slider.value = prevVolume
+
+
+func _on_print_track_data_button_pressed() -> void:
+	ExoPlayer.getResolutions(currently_attached_id)

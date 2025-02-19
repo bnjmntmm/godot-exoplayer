@@ -90,6 +90,12 @@ func release_player(id:int) -> void:
 		_android_plugin.releaseExoPlayer(id)
 		players.erase(id)
 		exoplayer_id_array.erase(id)
+		
+		
+func getResolutions(id: int)-> void:
+	if _android_plugin and players.has(id):
+		var tracks  = _android_plugin.getResolutions(id)
+		print("id: ", tracks)
 #endregion
 
 #region Signal Functions

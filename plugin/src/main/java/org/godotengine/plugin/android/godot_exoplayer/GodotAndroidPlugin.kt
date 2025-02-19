@@ -70,8 +70,7 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
                 newExoPlayer.addListener(createPlayerListener(id))
 
                 // 5) Prepare the media
-                val mediaItem = MediaItem.fromUri(videoUri)
-                newExoPlayer.setMediaItem(mediaItem)
+                newExoPlayer.setMediaItem(MediaItem.fromUri(videoUri))
                 newExoPlayer.prepare()
 
                 // 6) (Optional) Start playback immediately
@@ -108,7 +107,53 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
             exoPlayers[id]?.pause() ?: Log.e(pluginName, "ExoPlayer($id) not found when attempting to pause")
         }
     }
-
+    /**
+     * Get all the tracks that are available for the ExoPlayer with the given ID.
+     */
+    @OptIn(UnstableApi::class)
+    @UsedByGodot
+    fun getResolutions(id: Int): Array<String> {
+        val resolutions = ArrayList<String>()
+        val latch = CountDownLatch(1)
+        runOnUiThread {
+            exoPlayers[id]?.let { player ->
+                val tracks = player.currentTracks
+                for (group in tracks.groups) {
+                    if (group.type == C.TRACK_TYPE_VIDEO) {
+                        for (i in 0 until group.length) {
+                            val format = group.getTrackFormat(i)
+                            val width = format.width
+                            val height = format.height
+                            val bitrate = format.bitrate
+                            if (width > 0 && height > 0) {
+                                val kbps = bitrate / 1000
+                                resolutions.add("${width}x${height} - ${kbps} kbps")
+                            }
+                        }
+                    }
+                }
+            }
+            latch.countDown()
+        }
+        latch.await()
+        return resolutions.toTypedArray()
+    }
+    /**
+     * Set the resolution of the ExoPlayer with the given ID.
+     */
+    @UsedByGodot
+    fun setResolution(id: Int, width: Int, height: Int) {
+        runOnUiThread {
+            exoPlayers[id]?.let { player ->
+                val currentParams = player.trackSelectionParameters
+                player.trackSelectionParameters = currentParams
+                    .buildUpon()
+                    .setMaxVideoSize(width, height)
+                    .build()
+                Log.v(pluginName, "ExoPlayer($id) track selection updated to max size ${width}x$height")
+            } ?: Log.e(pluginName, "ExoPlayer($id) not found when attempting to set resolution")
+        }
+    }
 
     /**
      * Set the volume of the ExoPlayer with the given ID.
