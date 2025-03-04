@@ -1,9 +1,10 @@
-[gd_scene load_steps=11 format=3 uid="uid://dbqrwjkpwj1rn"]
+[gd_scene load_steps=12 format=3 uid="uid://dbqrwjkpwj1rn"]
 
 [ext_resource type="Script" uid="uid://d3t2svyp1740u" path="res://scenes/main/main_xr.gd" id="1_j6ddo"]
 [ext_resource type="PackedScene" uid="uid://c7t0qooxsi3vb" path="res://scenes/xr_player/xr_player.tscn" id="2_be6s4"]
 [ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="3_cbtg8"]
 [ext_resource type="PackedScene" uid="uid://dacutnkwxu6d7" path="res://scenes/UI/videocontrolui.tscn" id="4_t3k56"]
+[ext_resource type="PackedScene" uid="uid://dl1ik8q2vaqe2" path="res://scenes/UI/test/test_panel.tscn" id="5_0f7ma"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_l5qah"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -62,6 +63,7 @@ use_android_surface = true
 android_surface_size = Vector2i(1920, 1080)
 sort_order = -1
 enable_hole_punch = true
+XR_FB_composition_layer_image_layout/vertical_flip = true
 quad_size = Vector2(1.6, 0.9)
 
 [node name="VideoControls2DIn3D" parent="XROrigin3D/CompLayer" instance=ExtResource("3_cbtg8")]
@@ -71,6 +73,14 @@ collision_layer = 5242880
 scene = ExtResource("4_t3k56")
 viewport_size = Vector2(800, 450)
 scene_properties_keys = PackedStringArray("videocontrolui.gd")
+
+[node name="Viewport2Din3D" parent="." instance=ExtResource("3_cbtg8")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.19652, 1.12225, 0)
+screen_size = Vector2(1.6, 0.9)
+scene = ExtResource("5_0f7ma")
+viewport_size = Vector2(700, 300)
+transparent = 0
+scene_properties_keys = PackedStringArray("test_panel.gd")
 
 [editable path="XROrigin3D"]
 [editable path="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2"]

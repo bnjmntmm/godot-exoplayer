@@ -1,0 +1,85 @@
+[gd_scene load_steps=2 format=3 uid="uid://dl1ik8q2vaqe2"]
+
+[ext_resource type="Script" uid="uid://blcqhykbp7y8v" path="res://scenes/UI/test/test_panel.gd" id="1_871uv"]
+
+[node name="TestPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_871uv")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "VIDEOPLAYERS:"
+
+[node name="FetchPlayersButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 202.0
+offset_right = 339.0
+offset_bottom = 31.0
+text = "Fetch all Players "
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 366.0
+offset_top = 4.0
+offset_right = 509.0
+offset_bottom = 27.0
+text = "Selected Player ID:"
+
+[node name="OptionButton" type="OptionButton" parent="."]
+layout_mode = 0
+offset_left = 512.0
+offset_top = 4.0
+offset_right = 640.0
+offset_bottom = 31.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 41.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="VideoLoadedLabel" type="Label" parent="VBoxContainer/HBoxContainer2/VBoxContainer"]
+layout_mode = 2
+text = "Video loaded: "
+
+[node name="VideoDurationLabel" type="Label" parent="VBoxContainer/HBoxContainer2/VBoxContainer"]
+layout_mode = 2
+text = "Video duration: "
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/HBoxContainer2/VBoxContainer"]
+custom_minimum_size = Vector2(500, 30)
+layout_mode = 2
+
+[node name="VideoResLabel" type="Label" parent="VBoxContainer/HBoxContainer2/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+text = "Video Resolutions: "
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="FetchPlayerDataButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Fetch Data"
+
+[node name="ClearDataButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Clear Data"
+
+[connection signal="button_up" from="FetchPlayersButton" to="." method="_on_fetch_players_button_button_up"]
+[connection signal="button_up" from="VBoxContainer/HBoxContainer/FetchPlayerDataButton" to="." method="_on_fetch_player_data_button_button_up"]
