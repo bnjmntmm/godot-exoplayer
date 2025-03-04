@@ -57,6 +57,8 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
                 // 3) Create a new ExoPlayer and use the audiosink
                 val newExoPlayer = activity?.let { ctx ->
                     ExoPlayer.Builder(ctx)
+                        // this would allow us to use our custom audio sink
+                        // and get the data frames
 //                        .setRenderersFactory(GodotRendererFactory(ctx))
                         .build()
                 }

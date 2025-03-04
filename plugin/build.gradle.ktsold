@@ -1,10 +1,14 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
 }
 
+// TODO: Update value to your plugin's name.
 val pluginName = "godot_exoplayer"
+
+// TODO: Update value to match your plugin's package name.
 val pluginPackageName = "org.godotengine.plugin.android.godot_exoplayer"
 
 android {
@@ -17,9 +21,11 @@ android {
 
     defaultConfig {
         minSdk = 21
+
         manifestPlaceholders["godotPluginName"] = pluginName
         manifestPlaceholders["godotPluginPackageName"] = pluginPackageName
-        buildConfigField("String", "GODOT_PLUGIN_NAME", "\"$pluginName\"")
+        buildConfigField("String", "GODOT_PLUGIN_NAME", "\"${pluginName}\"")
+        setProperty("archivesBaseName", pluginName)
     }
 
     compileOptions {
@@ -33,16 +39,13 @@ android {
 
 dependencies {
     implementation("org.godotengine:godot:4.4.0.stable")
-    // exoplayer dependencies
+    // TODO: Additional dependencies should be added to export_plugin.gd as well.
+
+    // exoplayer stuff
     implementation("androidx.media3:media3-exoplayer:1.4.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.4.1")
     implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
     implementation("androidx.media3:media3-ui:1.4.1")
-}
-
-// Set the archivesBaseName using the public API (requires the base plugin to be applied)
-base {
-    archivesName = pluginName
 }
 
 // BUILD TASKS DEFINITION
@@ -66,10 +69,11 @@ val cleanDemoAddons by tasks.registering(Delete::class) {
 
 val copyAddonsToDemo by tasks.registering(Copy::class) {
     description = "Copies the export scripts templates to the plugin's addons directory"
+
     dependsOn(cleanDemoAddons)
-    // Both debug and release tasks should be finalized after this copy finishes
     finalizedBy(copyDebugAARToDemoAddons)
     finalizedBy(copyReleaseAARToDemoAddons)
+
     from("export_scripts_template")
     into("demo/addons/$pluginName")
 }
@@ -78,6 +82,6 @@ tasks.named("assemble").configure {
     finalizedBy(copyAddonsToDemo)
 }
 
-tasks.named<Delete>("clean").configure {
+tasks.named<Delete>("clean").apply {
     dependsOn(cleanDemoAddons)
 }
