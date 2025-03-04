@@ -4,6 +4,9 @@ extends EditorPlugin
 # A class member to hold the editor export plugin during its lifecycle.
 var export_plugin : AndroidExportPlugin
 
+## adds the ExoPlayer.gd as a Singleton autoload
+const AUTOLOAD_NAME = "ExoPlayer"
+
 func _enter_tree():
 	# Initialization of the plugin goes here.
 	export_plugin = AndroidExportPlugin.new()
@@ -15,6 +18,11 @@ func _exit_tree():
 	remove_export_plugin(export_plugin)
 	export_plugin = null
 
+func _enable_plugin() -> void:
+	add_autoload_singleton(AUTOLOAD_NAME, "res://addons/godot_exoplayer/ExoPlayer.gd")
+
+func _disable_plugin():
+	remove_autoload_singleton(AUTOLOAD_NAME)
 
 class AndroidExportPlugin extends EditorExportPlugin:
 	# TODO: Update to your plugin's name.
