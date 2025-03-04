@@ -19,7 +19,7 @@ func _exit_tree():
 	export_plugin = null
 
 func _enable_plugin() -> void:
-	add_autoload_singleton(AUTOLOAD_NAME, "res://addons/godot-exoplayer/ExoPlayer.gd")
+	add_autoload_singleton(AUTOLOAD_NAME, "res://addons/godot_exoplayer/ExoPlayer.gd")
 
 func _disable_plugin():
 	remove_autoload_singleton(AUTOLOAD_NAME)

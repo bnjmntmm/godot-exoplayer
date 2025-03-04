@@ -57,12 +57,12 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
                 // 3) Create a new ExoPlayer and use the audiosink
                 val newExoPlayer = activity?.let { ctx ->
                     ExoPlayer.Builder(ctx)
-                        .setRenderersFactory(GodotRendererFactory(ctx))
+//                        .setRenderersFactory(GodotRendererFactory(ctx))
                         .build()
                 }
                 if (newExoPlayer == null) {
                     Log.e(pluginName, "Failed to create ExoPlayer for id $id")
-                    emitSignal("on_player_error", "Failed to create ExoPlayer for id $id")
+                    emitSignal("on_player_error",id, "Failed to create ExoPlayer for id $id")
                     return@runOnUiThread
                 }
                 // 4) Assign the provided Surface
@@ -83,7 +83,7 @@ class GodotAndroidPlugin(godot: Godot) : GodotPlugin(godot) {
 
             } catch (e: Exception) {
                 Log.e(pluginName, "Error creating ExoPlayer($id): ${e.message}")
-                emitSignal("on_video_error", "Error creating ExoPlayer($id): ${e.message}")
+                emitSignal("on_player_error", id,"Error creating ExoPlayer($id): ${e.message}")
             }
         }
     }

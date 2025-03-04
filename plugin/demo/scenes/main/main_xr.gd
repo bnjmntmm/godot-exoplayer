@@ -28,6 +28,7 @@ func _ready() -> void:
 	
 	
 	ExoPlayer.connect("player_ready",_on_player_ready)
+	ExoPlayer.connect("video_end",_on_video_end)
 	await get_tree().create_timer(2).timeout
 	create_android_surface()
 	### play (id of player)
@@ -72,3 +73,6 @@ func _on_player_ready(id: int, duration:int):
 		$XROrigin3D/CompLayer/VideoControls2DIn3D.scene_node.setup_video_controls(player_id,duration) 
 		
 		## here we also could do ExoPlayer.play(player_id) if we want autoplay
+
+func _on_video_end(id):
+	print("Video from player " + str(id) + " has ended. Do something with it!")
