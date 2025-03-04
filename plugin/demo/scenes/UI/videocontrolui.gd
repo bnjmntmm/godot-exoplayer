@@ -12,6 +12,7 @@ var prevVolume : float = 1.0
 @onready var play_pause_button: Button = $VBoxContainer/MarginContainer/HBoxContainer/PlayPauseButton
 @onready var error_label: Label = $VBoxContainer/MarginContainer/HBoxContainer/ErrorLabel
 @onready var volume_slider: HSlider = $VBoxContainer/MarginContainer/HBoxContainer2/VolumeSlider
+@onready var res_option_button: OptionButton = $VBoxContainer/MarginContainer/HBoxContainer2/ResOptionButton
 
 func setup_video_controls(exoplayer_id: int, duration) -> void:
 	update_ui_state(false)
@@ -27,6 +28,8 @@ func _on_player_ready(id: int, duration: int) -> void:
 	if id == currently_attached_id:
 		videoDuration = duration
 		timeline.max_value = duration / 1000.0 ## dividing because we want seconds
+		## get the video resolutions and add them to the optionbutton
+		fill_res_option_button()
 		update_ui_state(true)
 		error_label.hide()
 		#volume_slider.value = ExoPlayer.getPlayerVolume(currently_attached_id)
@@ -87,6 +90,7 @@ func _on_minus_ten_button_button_up() -> void:
 
 func _on_volume_slider_value_changed(value: float) -> void:
 	ExoPlayer.setPlayerVolume(currently_attached_id, value)
+	
 func _on_mute_button_pressed() -> void:
 	if not isMute:
 		isMute = true
@@ -96,6 +100,25 @@ func _on_mute_button_pressed() -> void:
 		isMute = false
 		volume_slider.value = prevVolume
 
+func fill_res_option_button() -> void:
+	res_option_button.clear()
+	var resolutions = ExoPlayer.getVideoResolutions(currently_attached_id)
+	if resolutions.size() > 1:
+		res_option_button.show()
+		for res in resolutions:
+			res_option_button.add_item(res)
+	
 
-func _on_print_track_data_button_pressed() -> void:
-	ExoPlayer.getResolutions(currently_attached_id)
+
+func _on_res_option_button_item_selected(index: int) -> void:
+	var selected_res_text : String = res_option_button.get_item_text(index)
+	## now we need to split the text as its like widthxheight - kbps
+	var splitText = selected_res_text.split(" - ")
+	var resText = splitText[0]
+	var resTextArray = resText.split("x")
+	var width : int = int(resTextArray[0])
+	var height : int = int(resTextArray[1])
+	print("trying to select res with width: ", width, " and height: ", height)
+	ExoPlayer.setVideoResolution(currently_attached_id,width, height)
+	
+	

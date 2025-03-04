@@ -36,7 +36,7 @@ func _on_fetch_player_data_button_button_up() -> void:
 		already_filled = true
 		var player_is_ready = ExoPlayer.is_player_ready(current_selected_player)
 		var duration_in_ms = ExoPlayer.getVideoDuration(current_selected_player)
-		var video_res = ExoPlayer.getResolutions(current_selected_player)
+		var video_res = ExoPlayer.getVideoResolutions(current_selected_player)
 		
 		video_loaded_label.text += str(player_is_ready)
 		video_duration_label.text += str(duration_in_ms / 1000) + "s"

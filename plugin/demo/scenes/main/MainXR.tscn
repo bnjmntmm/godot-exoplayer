@@ -48,8 +48,15 @@ shape = SubResource("BoxShape3D_l5qah")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
 mesh = SubResource("BoxMesh_bdica")
 
+[node name="Viewport2Din3D" parent="." instance=ExtResource("3_cbtg8")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.19652, 1.12225, 0)
+screen_size = Vector2(1.6, 0.9)
+scene = ExtResource("5_0f7ma")
+viewport_size = Vector2(700, 300)
+transparent = 0
+scene_properties_keys = PackedStringArray("test_panel.gd")
+
 [node name="XROrigin3D" parent="." instance=ExtResource("2_be6s4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.129055, 0)
 
 [node name="BoneAttachment3D" parent="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2/LeftHandHumanoid/Skeleton3D" index="2"]
 transform = Transform3D(0.0148923, 0.3927, 0.919546, -0.993092, 0.112853, -0.0321113, -0.116383, -0.912716, 0.391668, -0.0111001, 0.0429431, -0.171614)
@@ -73,14 +80,6 @@ collision_layer = 5242880
 scene = ExtResource("4_t3k56")
 viewport_size = Vector2(800, 450)
 scene_properties_keys = PackedStringArray("videocontrolui.gd")
-
-[node name="Viewport2Din3D" parent="." instance=ExtResource("3_cbtg8")]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.19652, 1.12225, 0)
-screen_size = Vector2(1.6, 0.9)
-scene = ExtResource("5_0f7ma")
-viewport_size = Vector2(700, 300)
-transparent = 0
-scene_properties_keys = PackedStringArray("test_panel.gd")
 
 [editable path="XROrigin3D"]
 [editable path="XROrigin3D/LeftTrackedHand/LeftHandHumanoid2"]
