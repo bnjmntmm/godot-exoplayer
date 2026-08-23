@@ -54,7 +54,10 @@ internal class GodotPcmBuffer {
                     for (channel in 0 until channelCount) {
                         val sample = readSample(source, encoding)
                         when (channel) {
-                            0 -> left = sample
+                            0 -> {
+                                left = sample
+                                right = sample
+                            }
                             1 -> right = sample
                             else -> {
                                 left += sample * DOWNMIX_GAIN
