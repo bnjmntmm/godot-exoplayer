@@ -1,6 +1,8 @@
 package org.godotengine.plugin.android.godot_exoplayer
 
+import android.media.AudioFormat
 import androidx.media3.common.C
+import androidx.media3.common.util.Util
 import org.godotengine.godot.Dictionary
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -36,21 +38,50 @@ internal class GodotPcmBuffer {
 
         val source = buffer.slice().order(ByteOrder.LITTLE_ENDIAN)
         val frameCount = source.remaining() / (bytesPerSample * channelCount)
+        val channelMask = Util.getAudioTrackChannelConfig(channelCount)
         for (frame in 0 until frameCount) {
-            var left = 0f
-            var right = 0f
-            for (channel in 0 until channelCount) {
-                val sample = readSample(source, encoding)
-                when (channel) {
-                    0 -> {
-                        left = sample
-                        right = sample
+            var left: Float
+            var right: Float
+            if (channelCount == 1) {
+                left = readSample(source, encoding)
+                right = left
+            } else {
+                left = 0f
+                right = 0f
+                if (channelMask == AudioFormat.CHANNEL_INVALID) {
+                    // Unsupported layouts retain the legacy first-two-channel mapping and
+                    // accumulate every remaining channel into both stereo outputs.
+                    for (channel in 0 until channelCount) {
+                        val sample = readSample(source, encoding)
+                        when (channel) {
+                            0 -> {
+                                left = sample
+                                right = sample
+                            }
+                            1 -> right = sample
+                            else -> {
+                                left += sample * DOWNMIX_GAIN
+                                right += sample * DOWNMIX_GAIN
+                            }
+                        }
                     }
-                    1 -> right = sample
-                    else -> {
-                        val surroundGain = 0.5f / (channelCount - 2)
-                        left += sample * surroundGain
-                        right += sample * surroundGain
+                } else {
+                    // Android channel-mask bit order matches the PCM sample order in each frame.
+                    var remainingMask = channelMask
+                    for (channel in 0 until channelCount) {
+                        val sample = readSample(source, encoding)
+                        val role = Integer.lowestOneBit(remainingMask)
+                        remainingMask = remainingMask and (remainingMask - 1)
+                        when (role) {
+                            AudioFormat.CHANNEL_OUT_FRONT_LEFT -> left += sample
+                            AudioFormat.CHANNEL_OUT_FRONT_RIGHT -> right += sample
+                            AudioFormat.CHANNEL_OUT_FRONT_CENTER -> {
+                                left += sample * DOWNMIX_GAIN
+                                right += sample * DOWNMIX_GAIN
+                            }
+                            AudioFormat.CHANNEL_OUT_SIDE_LEFT, AudioFormat.CHANNEL_OUT_BACK_LEFT -> left += sample * DOWNMIX_GAIN
+                            AudioFormat.CHANNEL_OUT_SIDE_RIGHT, AudioFormat.CHANNEL_OUT_BACK_RIGHT -> right += sample * DOWNMIX_GAIN
+                        }
                     }
                 }
             }
@@ -103,6 +134,7 @@ internal class GodotPcmBuffer {
         put("channelCount", channelCount)
         put("encoding", encoding)
         put("queuedFrames", queuedFrames)
+        put("maxQueuedFrames", MAX_QUEUED_FRAMES)
         put("droppedFrames", droppedFrames)
         put("underrunFrames", underrunFrames)
     }
@@ -132,5 +164,6 @@ internal class GodotPcmBuffer {
     private companion object {
         const val OUTPUT_CHANNELS = 2
         const val MAX_QUEUED_FRAMES = 96_000
+        private const val DOWNMIX_GAIN = 0.70710678f
     }
 }

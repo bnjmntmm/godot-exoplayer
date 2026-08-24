@@ -6,6 +6,8 @@ signal player_error(id: int, error_message: String)
 signal video_end(id: int)
 signal player_state_changed(id: int, state: int)
 signal subtitle_cues(id: int, cues: PackedStringArray)
+signal audio_resynced(id: int, queued_frames: int)
+signal media_request_observed(id: int, url: String)
 
 
 var _plugin_name = "godot_exoplayer"
@@ -20,6 +22,8 @@ var _managed_audio_players : Dictionary = {}
 const DEFAULT_GODOT_AUDIO_BUFFER_LENGTH := 0.5
 const DEFAULT_GODOT_AUDIO_MIX_RATE := 48000
 const GODOT_AUDIO_POLL_FRAMES := 2048
+const AUDIO_RESYNC_THRESHOLD_RATIO := 0.9375
+const AUDIO_RESYNC_SATURATION_MS := 1500
 const STATE_IDLE := 1
 const STATE_BUFFERING := 2
 const STATE_READY := 3
@@ -63,7 +67,9 @@ func create_player(android_surface, video_uri: String, options: Dictionary = {})
 			"godot_audio_sample_rate": 0,
 			"godot_audio_buffer_length": float(config.get("godotAudioBufferLength", DEFAULT_GODOT_AUDIO_BUFFER_LENGTH)),
 			"logical_volume": float(config.get("volume", 1.0)),
-			"spatial_audio_mode": int(config.get("spatialAudioMode", 0))
+			"spatial_audio_mode": int(config.get("spatialAudioMode", 0)),
+			"native_is_playing": false,
+			"audio_resync_saturated_since_msec": 0
 		}
 
 		if players[new_id].route_audio_to_godot:
@@ -392,7 +398,9 @@ func _pump_godot_audio(id: int) -> void:
 	if players_list.size() == 0:
 		return
 
-	_update_godot_audio_format(id)
+	var format := _android_plugin.getAudioFormat(id) as Dictionary
+	_update_godot_audio_format(id, format)
+	_audio_resync_guard(id, format)
 
 	var playbacks_list = players[id].godot_audio_playbacks
 	for i in range(players_list.size()):
@@ -458,8 +466,7 @@ func _pump_godot_audio(id: int) -> void:
 			if playback != null:
 				playback.push_buffer(frames)
 
-func _update_godot_audio_format(id: int) -> void:
-	var format: Dictionary = _android_plugin.getAudioFormat(id)
+func _update_godot_audio_format(id: int, format: Dictionary) -> void:
 	var sample_rate := int(format.get("sampleRate", 0))
 	if sample_rate <= 0 or sample_rate == int(players[id].godot_audio_sample_rate):
 		return
@@ -533,6 +540,30 @@ func _clear_godot_audio_buffer(id: int) -> void:
 	if playbacks_list.size() > 0:
 		players[id].godot_audio_playback = playbacks_list[0]
 
+static func _audio_resync_saturated_since_msec(queued_frames: int, max_queued_frames: int, now_msec: int, saturated_since_msec: int) -> int:
+	if max_queued_frames <= 0 or queued_frames < int(max_queued_frames * AUDIO_RESYNC_THRESHOLD_RATIO):
+		return 0
+	return saturated_since_msec if saturated_since_msec > 0 else now_msec
+
+func _audio_resync_guard(id: int, format: Dictionary) -> void:
+	if not _android_plugin or not players.has(id) or not bool(players[id].get("native_is_playing", false)):
+		if players.has(id):
+			players[id]["audio_resync_saturated_since_msec"] = 0
+		return
+	var queued := int(format.get("queuedFrames", 0))
+	var now_msec := Time.get_ticks_msec()
+	var saturated_since_msec := _audio_resync_saturated_since_msec(
+		queued,
+		int(format.get("maxQueuedFrames", 0)),
+		now_msec,
+		int(players[id].get("audio_resync_saturated_since_msec", 0))
+	)
+	players[id]["audio_resync_saturated_since_msec"] = saturated_since_msec
+	if saturated_since_msec > 0 and now_msec - saturated_since_msec >= AUDIO_RESYNC_SATURATION_MS:
+		_clear_godot_audio_buffer(id)
+		players[id]["audio_resync_saturated_since_msec"] = 0
+		emit_signal("audio_resynced", id, queued)
+
 func _apply_godot_audio_volume(id: int) -> void:
 	if not players.has(id) or not players[id].route_audio_to_godot:
 		return
@@ -586,7 +617,9 @@ func connect_plugin_signals() -> void:
 		_android_plugin.connect("on_player_error", _on_player_error)
 		_android_plugin.connect("on_video_end", _on_video_end)
 		_android_plugin.connect("on_player_state_changed", _on_player_state_changed)
+		_android_plugin.connect("on_is_playing_changed", _on_is_playing_changed)
 		_android_plugin.connect("on_subtitle_cues", _on_subtitle_cues)
+		_android_plugin.connect("on_media_request_observed", _on_media_request_observed)
 
 func _on_player_created(id: int) -> void:
 	if players.has(id):
@@ -618,8 +651,17 @@ func _on_player_state_changed(id: int, state: int) -> void:
 		players[id].state = state
 	emit_signal("player_state_changed", id, state)
 
+func _on_is_playing_changed(id: int, is_playing: bool) -> void:
+	if players.has(id):
+		players[id].native_is_playing = is_playing
+		if not is_playing:
+			players[id].audio_resync_saturated_since_msec = 0
+
 func _on_subtitle_cues(id: int, cues: Array) -> void:
 	emit_signal("subtitle_cues", id, PackedStringArray(cues))
+
+func _on_media_request_observed(id: int, url: String) -> void:
+	emit_signal("media_request_observed", id, url)
 
 func _exit_tree() -> void:
 	for id in players.keys():

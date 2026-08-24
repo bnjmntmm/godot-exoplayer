@@ -1,4 +1,3 @@
-
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -39,7 +38,7 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer-hls:1.6.1")
 }
 
-// Set the archivesBaseName using the public API (requires the base plugin to be applied)
+// Set the archivesName using the public API (requires the base plugin to be applied)
 base {
     archivesName = pluginName
 }

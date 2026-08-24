@@ -8,10 +8,12 @@ signal player_error(id: int, error_message: String)
 signal video_end(id: int)
 signal player_state_changed(id: int, state: int)
 signal subtitle_cues(id: int, cues: PackedStringArray)
+signal audio_resynced(id: int, queued_frames: int)
 
 @export_group("ExoPlayer")
 @export var video_uri: String = ""
 @export var source_config: ExoPlayerSourceConfig
+@export var buffer_config: ExoPlayerBufferConfig
 @export var create_on_ready: bool = true
 @export var creation_delay: float = 0.0
 @export_range(0.1, 30.0, 0.1, "suffix:s") var surface_wait_timeout: float = 5.0
@@ -187,6 +189,8 @@ func _build_options() -> Dictionary:
 	}
 	if source_config != null:
 		options.merge(source_config.to_options(), true)
+	if buffer_config != null:
+		options.merge(buffer_config.to_options(), true)
 	if audio_config != null:
 		options.merge(audio_config.to_options(), true)
 	if drm_config != null:
@@ -239,6 +243,8 @@ func _connect_exoplayer_signals() -> void:
 		ExoPlayer.player_state_changed.connect(_on_exoplayer_state_changed)
 	if not ExoPlayer.subtitle_cues.is_connected(_on_exoplayer_subtitle_cues):
 		ExoPlayer.subtitle_cues.connect(_on_exoplayer_subtitle_cues)
+	if not ExoPlayer.audio_resynced.is_connected(_on_exoplayer_audio_resynced):
+		ExoPlayer.audio_resynced.connect(_on_exoplayer_audio_resynced)
 
 func _on_exoplayer_created(id: int) -> void:
 	if id == player_id:
@@ -263,6 +269,10 @@ func _on_exoplayer_state_changed(id: int, state: int) -> void:
 func _on_exoplayer_subtitle_cues(id: int, cues: PackedStringArray) -> void:
 	if id == player_id:
 		emit_signal("subtitle_cues", id, cues)
+
+func _on_exoplayer_audio_resynced(id: int, queued_frames: int) -> void:
+	if id == player_id:
+		emit_signal("audio_resynced", id, queued_frames)
 
 func _has_exoplayer_singleton() -> bool:
 	return Engine.has_singleton("ExoPlayer") or has_node("/root/ExoPlayer")

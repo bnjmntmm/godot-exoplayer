@@ -8,10 +8,13 @@ signal player_error(id: int, error_message: String)
 signal video_end(id: int)
 signal player_state_changed(id: int, state: int)
 signal subtitle_cues(id: int, cues: PackedStringArray)
+signal audio_resynced(id: int, queued_frames: int)
+signal media_request_observed(id: int, url: String)
 
 @export_group("ExoPlayer")
 @export var video_uri: String = ""
 @export var source_config: ExoPlayerSourceConfig
+@export var buffer_config: ExoPlayerBufferConfig
 @export var create_on_ready: bool = true
 @export var creation_delay: float = 0.0
 @export_range(0.1, 30.0, 0.1, "suffix:s") var surface_wait_timeout: float = 5.0
@@ -22,6 +25,7 @@ signal subtitle_cues(id: int, cues: PackedStringArray)
 @export var use_cache: bool = false
 @export var parse_program_date_time: bool = false
 @export var debug_logging: bool = false
+@export var observed_url_pattern: String = ""
 
 @export_group("DRM")
 @export var drm_config: ExoPlayerDrmConfig
@@ -187,6 +191,10 @@ func _build_options() -> Dictionary:
 	}
 	if source_config != null:
 		options.merge(source_config.to_options(), true)
+	if buffer_config != null:
+		options.merge(buffer_config.to_options(), true)
+	if not observed_url_pattern.is_empty():
+		options["observedUrlPattern"] = observed_url_pattern
 	if audio_config != null:
 		options.merge(audio_config.to_options(), true)
 	if drm_config != null:
@@ -239,6 +247,10 @@ func _connect_exoplayer_signals() -> void:
 		ExoPlayer.player_state_changed.connect(_on_exoplayer_state_changed)
 	if not ExoPlayer.subtitle_cues.is_connected(_on_exoplayer_subtitle_cues):
 		ExoPlayer.subtitle_cues.connect(_on_exoplayer_subtitle_cues)
+	if not ExoPlayer.audio_resynced.is_connected(_on_exoplayer_audio_resynced):
+		ExoPlayer.audio_resynced.connect(_on_exoplayer_audio_resynced)
+	if not ExoPlayer.media_request_observed.is_connected(_on_exoplayer_media_request_observed):
+		ExoPlayer.media_request_observed.connect(_on_exoplayer_media_request_observed)
 
 func _on_exoplayer_created(id: int) -> void:
 	if id == player_id:
@@ -263,6 +275,14 @@ func _on_exoplayer_state_changed(id: int, state: int) -> void:
 func _on_exoplayer_subtitle_cues(id: int, cues: PackedStringArray) -> void:
 	if id == player_id:
 		emit_signal("subtitle_cues", id, cues)
+
+func _on_exoplayer_audio_resynced(id: int, queued_frames: int) -> void:
+	if id == player_id:
+		emit_signal("audio_resynced", id, queued_frames)
+
+func _on_exoplayer_media_request_observed(id: int, url: String) -> void:
+	if id == player_id:
+		emit_signal("media_request_observed", id, url)
 
 func _has_exoplayer_singleton() -> bool:
 	return Engine.has_singleton("ExoPlayer") or has_node("/root/ExoPlayer")
