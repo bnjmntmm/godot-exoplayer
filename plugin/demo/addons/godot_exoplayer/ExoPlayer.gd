@@ -7,6 +7,7 @@ signal video_end(id: int)
 signal player_state_changed(id: int, state: int)
 signal subtitle_cues(id: int, cues: PackedStringArray)
 signal audio_resynced(id: int, queued_frames: int)
+signal media_request_observed(id: int, url: String)
 
 
 var _plugin_name = "godot_exoplayer"
@@ -618,6 +619,7 @@ func connect_plugin_signals() -> void:
 		_android_plugin.connect("on_player_state_changed", _on_player_state_changed)
 		_android_plugin.connect("on_is_playing_changed", _on_is_playing_changed)
 		_android_plugin.connect("on_subtitle_cues", _on_subtitle_cues)
+		_android_plugin.connect("on_media_request_observed", _on_media_request_observed)
 
 func _on_player_created(id: int) -> void:
 	if players.has(id):
@@ -657,6 +659,9 @@ func _on_is_playing_changed(id: int, is_playing: bool) -> void:
 
 func _on_subtitle_cues(id: int, cues: Array) -> void:
 	emit_signal("subtitle_cues", id, PackedStringArray(cues))
+
+func _on_media_request_observed(id: int, url: String) -> void:
+	emit_signal("media_request_observed", id, url)
 
 func _exit_tree() -> void:
 	for id in players.keys():

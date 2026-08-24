@@ -82,3 +82,10 @@ val packageAddon by tasks.registering(Zip::class) {
         into("addons/$pluginName/bin/release")
     }
 }
+
+// Keep the checked-in demo addon in sync with the normal build lifecycle.
+tasks.named("assemble").configure {
+    finalizedBy(copyAddonsToDemo)
+    finalizedBy(copyDebugAARToDemoAddons)
+    finalizedBy(copyReleaseAARToDemoAddons)
+}
