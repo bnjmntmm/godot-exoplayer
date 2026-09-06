@@ -31,6 +31,10 @@ func _ready() -> void:
 		print("OpenXR not initialized!")
 	
 	exo_player_composition_layer.video_end.connect(_on_video_end)
+	exo_player_composition_layer.player_created.connect(_on_player_created)
+	exo_player_composition_layer.player_ready.connect(_on_player_ready)
+	if exo_player_composition_layer.player_id > 0:
+		_on_player_created(exo_player_composition_layer.player_id)
 	
 	await get_tree().create_timer(5).timeout
 	
@@ -58,7 +62,11 @@ func enable_passthrough():
 	return true
 
 
-func _on_player_ready(id: int, duration:int):
+func _on_player_created(id: int) -> void:
+	player_id = id
+	$XROrigin3D/ExoPlayerCompositionLayer/VideoControls2DIn3D.scene_node.setup_video_controls(id, -1)
+
+func _on_player_ready(id: int, duration: float):
 	if id == player_id:
 		$XROrigin3D/ExoPlayerCompositionLayer/VideoControls2DIn3D.scene_node.setup_video_controls(player_id,duration) 
 		

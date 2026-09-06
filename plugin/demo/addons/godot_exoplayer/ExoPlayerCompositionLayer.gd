@@ -10,11 +10,15 @@ signal player_state_changed(id: int, state: int)
 signal subtitle_cues(id: int, cues: PackedStringArray)
 signal audio_resynced(id: int, queued_frames: int)
 signal media_request_observed(id: int, url: String)
+## All extended events are filtered to this layer's player.
+signal player_event(id: int, event: String, data: Dictionary)
 
 @export_group("ExoPlayer")
 @export var video_uri: String = ""
 @export var source_config: ExoPlayerSourceConfig
 @export var buffer_config: ExoPlayerBufferConfig
+@export var retry_config: ExoPlayerRetryConfig
+@export var track_preferences: ExoPlayerTrackPreferences
 @export var create_on_ready: bool = true
 @export var creation_delay: float = 0.0
 @export_range(0.1, 30.0, 0.1, "suffix:s") var surface_wait_timeout: float = 5.0
@@ -157,6 +161,55 @@ func get_buffered_position() -> int:
 		return ExoPlayer.get_buffered_position(player_id)
 	return -1
 
+func get_live_state() -> Dictionary:
+	return ExoPlayer.get_live_state(player_id) if player_id > 0 else {}
+
+func go_live() -> void:
+	if player_id > 0:
+		ExoPlayer.go_live(player_id)
+
+func get_playback_stats() -> Dictionary:
+	return ExoPlayer.get_playback_stats(player_id) if player_id > 0 else {}
+
+func retry(live_at_default_position: bool = true) -> void:
+	if player_id > 0:
+		ExoPlayer.retry(player_id, live_at_default_position)
+
+func refresh_credentials(media_headers: Dictionary, license_headers: Dictionary = {}) -> void:
+	if player_id > 0:
+		ExoPlayer.refresh_credentials(player_id, media_headers, license_headers)
+
+func set_track_preferences(preferences: Dictionary) -> void:
+	if player_id > 0:
+		ExoPlayer.set_track_preferences(player_id, preferences)
+
+func enqueue(uri: String, options: Dictionary = {}) -> void:
+	if player_id > 0:
+		ExoPlayer.enqueue(player_id, uri, options)
+
+func remove_playlist_item(index: int) -> void:
+	if player_id > 0:
+		ExoPlayer.remove_playlist_item(player_id, index)
+
+func seek_playlist_item(index: int) -> void:
+	if player_id > 0:
+		ExoPlayer.seek_playlist_item(player_id, index)
+
+func next() -> void:
+	if player_id > 0:
+		ExoPlayer.next(player_id)
+
+func previous() -> void:
+	if player_id > 0:
+		ExoPlayer.previous(player_id)
+
+func set_shuffle(enabled: bool) -> void:
+	if player_id > 0:
+		ExoPlayer.set_shuffle(player_id, enabled)
+
+func get_playlist() -> Dictionary:
+	return ExoPlayer.get_playlist(player_id) if player_id > 0 else {}
+
 func _exit_tree() -> void:
 	if not Engine.is_editor_hint():
 		release_player()
@@ -193,6 +246,10 @@ func _build_options() -> Dictionary:
 		options.merge(source_config.to_options(), true)
 	if buffer_config != null:
 		options.merge(buffer_config.to_options(), true)
+	if retry_config != null:
+		options["retryPolicy"] = retry_config.to_options()
+	if track_preferences != null:
+		options["trackPreferences"] = track_preferences.to_options()
 	if not observed_url_pattern.is_empty():
 		options["observedUrlPattern"] = observed_url_pattern
 	if audio_config != null:
@@ -235,6 +292,8 @@ func _get_configuration_warnings() -> PackedStringArray:
 	return warnings
 
 func _connect_exoplayer_signals() -> void:
+	if not ExoPlayer.player_event.is_connected(_on_exoplayer_event):
+		ExoPlayer.player_event.connect(_on_exoplayer_event)
 	if not ExoPlayer.player_created.is_connected(_on_exoplayer_created):
 		ExoPlayer.player_created.connect(_on_exoplayer_created)
 	if not ExoPlayer.player_ready.is_connected(_on_exoplayer_ready):
@@ -251,6 +310,10 @@ func _connect_exoplayer_signals() -> void:
 		ExoPlayer.audio_resynced.connect(_on_exoplayer_audio_resynced)
 	if not ExoPlayer.media_request_observed.is_connected(_on_exoplayer_media_request_observed):
 		ExoPlayer.media_request_observed.connect(_on_exoplayer_media_request_observed)
+
+func _on_exoplayer_event(id: int, event: String, data: Dictionary) -> void:
+	if id == player_id:
+		player_event.emit(id, event, data)
 
 func _on_exoplayer_created(id: int) -> void:
 	if id == player_id:

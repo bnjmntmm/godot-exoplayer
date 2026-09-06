@@ -3,6 +3,7 @@ package org.godotengine.plugin.android.godot_exoplayer
 import android.content.Context
 import android.util.Log
 import androidx.media3.common.audio.AudioProcessor
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
@@ -11,6 +12,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 /** Captures decoded Media3 PCM while keeping a silent AudioTrack as ExoPlayer's clock. */
+@UnstableApi
 internal class GodotAudioRenderersFactory(
     context: Context,
     private val audioBuffer: GodotPcmBuffer
@@ -31,6 +33,7 @@ internal class GodotAudioRenderersFactory(
         .build()
 }
 
+@UnstableApi
 private class GodotAudioSink(
     private val audioBuffer: GodotPcmBuffer
 ) : TeeAudioProcessor.AudioBufferSink {
@@ -42,6 +45,7 @@ private class GodotAudioSink(
     override fun handleBuffer(buffer: ByteBuffer) = audioBuffer.append(buffer)
 }
 
+@UnstableApi
 private class SilenceAudioProcessor : AudioProcessor {
     private var outputBuffer = AudioProcessor.EMPTY_BUFFER
     private var silenceBytes = ByteArray(0)

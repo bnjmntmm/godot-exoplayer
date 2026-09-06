@@ -20,7 +20,10 @@ internal data class PlayerConfig(
     val routeAudioToGodot: Boolean,
     val bufferDurations: BufferDurations?,
     val observedUrlPattern: ObservedUrlPattern?,
-    val drm: DrmConfig?
+    val drm: DrmConfig?,
+    val mediaId: String = "",
+    val liveTargetOffsetMs: Long = -1,
+    val subtitles: List<androidx.media3.common.MediaItem.SubtitleConfiguration> = emptyList()
 )
 
 internal data class BufferDurations(

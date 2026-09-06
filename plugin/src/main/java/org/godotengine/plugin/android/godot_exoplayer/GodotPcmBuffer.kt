@@ -3,12 +3,14 @@ package org.godotengine.plugin.android.godot_exoplayer
 import android.media.AudioFormat
 import androidx.media3.common.C
 import androidx.media3.common.util.Util
+import androidx.media3.common.util.UnstableApi
 import org.godotengine.godot.Dictionary
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.min
 
 /** Thread-safe stereo PCM ring buffer shared by Media3's audio thread and Godot. */
+@UnstableApi
 internal class GodotPcmBuffer {
     private val samples = FloatArray(MAX_QUEUED_FRAMES * OUTPUT_CHANNELS)
     private var readFrame = 0

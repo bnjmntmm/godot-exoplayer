@@ -5,6 +5,26 @@ var videoDuration : float = 0
 var videoPaused : bool = true
 var isMute : bool = false
 var prevVolume : float = 1.0
+var _diagnostics: ExoPlayerDiagnosticsPanel
+var _subtitles: ExoPlayerSubtitleView
+
+func _ready() -> void:
+	_subtitles = ExoPlayerSubtitleView.new()
+	add_child(_subtitles)
+	_subtitles.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_subtitles.offset_bottom = -75
+	_diagnostics = ExoPlayerDiagnosticsPanel.new()
+	add_child(_diagnostics)
+	_diagnostics.position = Vector2(12, 48)
+	_diagnostics.hide()
+	var toggle := Button.new()
+	toggle.text = "Diagnostics"
+	toggle.position = Vector2(12, 8)
+	toggle.toggle_mode = true
+	toggle.toggled.connect(func(enabled: bool): _diagnostics.visible = enabled)
+	add_child(toggle)
+	ExoPlayer.tracks_changed.connect(_on_tracks_changed)
+	ExoPlayer.player_state_changed.connect(_on_state_changed)
 
 
 @onready var timeline_timer: Timer = $VBoxContainer/HBoxContainer2/Timeline/TimelineTimer
@@ -17,10 +37,22 @@ var prevVolume : float = 1.0
 func setup_video_controls(exoplayer_id: int, duration) -> void:
 	update_ui_state(false)
 	currently_attached_id = exoplayer_id
+	_diagnostics.player_id = exoplayer_id
+	_subtitles.player_id = exoplayer_id
 	#ExoPlayer.player_ready.connect(_on_player_ready) ## player is ready before even setup is called -> not working. Need to call directly
-	ExoPlayer.player_error.connect(_on_player_error)
+	if not ExoPlayer.player_error.is_connected(_on_player_error):
+		ExoPlayer.player_error.connect(_on_player_error)
 	_on_player_ready(exoplayer_id, duration)
 	error_label.hide()
+	update_ui_state(ExoPlayer.is_player_ready(exoplayer_id))
+
+func _on_tracks_changed(id: int) -> void:
+	if id == currently_attached_id:
+		fill_res_option_button()
+
+func _on_state_changed(id: int, state: int) -> void:
+	if id == currently_attached_id:
+		update_ui_state(state == ExoPlayer.STATE_READY)
 	
 #region ExoPlayer Signals and Functions
 func _on_player_ready(id: int, duration: int) -> void:

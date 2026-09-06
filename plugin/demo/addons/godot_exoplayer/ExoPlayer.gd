@@ -8,6 +8,18 @@ signal player_state_changed(id: int, state: int)
 signal subtitle_cues(id: int, cues: PackedStringArray)
 signal audio_resynced(id: int, queued_frames: int)
 signal media_request_observed(id: int, url: String)
+signal live_state_changed(id: int, state: Dictionary)
+signal playback_error(id: int, error: Dictionary)
+signal authentication_required(id: int, error: Dictionary)
+signal retry_scheduled(id: int, attempt: int, delay_ms: int)
+signal retry_exhausted(id: int, error: Dictionary)
+signal tracks_changed(id: int)
+signal selected_tracks_changed(id: int)
+signal subtitle_cues_detailed(id: int, cues: Array)
+signal playlist_changed(id: int)
+signal media_item_transition(id: int, media_id: String, index: int, reason: int)
+signal cache_operation_completed(success: bool, message: String)
+signal player_event(id: int, event: String, data: Dictionary)
 
 
 var _plugin_name = "godot_exoplayer"
@@ -118,6 +130,8 @@ func pause(id):
 
 func stop(id: int) -> void:
 	if _android_plugin:
+		if players.has(id):
+			players[id].is_ready = false
 		_clear_godot_audio_buffer(id)
 		_android_plugin.stop(id)
 		_pause_godot_audio(id)
@@ -281,10 +295,98 @@ func is_player_ready(id: int) -> bool:
 	return players.get(id,{}).get("is_ready",false)
 
 func get_player_error(id: int) -> Dictionary:
-	return players.get(id,{}).get("error",{})
+	var error = players.get(id, {}).get("error")
+	return error if error is Dictionary else {}
+
+## Snapshot values use milliseconds; unavailable times are -1.
+func get_live_state(id: int) -> Dictionary:
+	return _android_plugin.getLiveState(id) if _android_plugin and players.has(id) else {}
+
+func is_live(id: int) -> bool:
+	return bool(get_live_state(id).get("is_live", false))
+
+func is_seekable(id: int) -> bool:
+	return bool(get_live_state(id).get("is_seekable", false))
+
+func go_live(id: int) -> void:
+	if _android_plugin and players.has(id):
+		_clear_godot_audio_buffer(id)
+		_android_plugin.goLive(id)
+
+func get_playback_stats(id: int) -> Dictionary:
+	return _android_plugin.getPlaybackStats(id) if _android_plugin and players.has(id) else {}
+
+## Disabled by default. maxAttempts is a budget per media item/manual retry.
+func set_retry_policy(id: int, policy: Dictionary) -> void:
+	if _android_plugin and players.has(id):
+		_android_plugin.setRetryPolicy(id, policy)
+
+func retry(id: int, live_at_default_position: bool = true) -> void:
+	if _android_plugin and players.has(id):
+		_clear_godot_audio_buffer(id)
+		_android_plugin.retry(id, live_at_default_position)
+
+## Supply complete replacement media/license headers after authentication_required.
+func refresh_credentials(id: int, media_headers: Dictionary, license_headers: Dictionary = {}) -> void:
+	if _android_plugin and players.has(id):
+		_clear_godot_audio_buffer(id)
+		_android_plugin.refreshCredentials(id, media_headers, license_headers)
+
+func set_track_preferences(id: int, preferences: Dictionary) -> void:
+	if _android_plugin and players.has(id):
+		_android_plugin.setTrackPreferences(id, preferences)
+
+## Options belong to this item; headers and DRM are not inherited from the previous item.
+func enqueue(id: int, uri: String, options: Dictionary = {}) -> void:
+	if _android_plugin and players.has(id):
+		var config := options.duplicate(true)
+		config["uri"] = uri
+		_android_plugin.enqueue(id, config)
+
+func remove_playlist_item(id: int, index: int) -> void:
+	if _android_plugin and players.has(id):
+		_android_plugin.removePlaylistItem(id, index)
+
+func seek_playlist_item(id: int, index: int) -> void:
+	if _android_plugin and players.has(id):
+		_clear_godot_audio_buffer(id)
+		_android_plugin.seekPlaylistItem(id, index)
+
+func next(id: int) -> void:
+	if _android_plugin and players.has(id):
+		_clear_godot_audio_buffer(id)
+		_android_plugin.next(id)
+
+func previous(id: int) -> void:
+	if _android_plugin and players.has(id):
+		_clear_godot_audio_buffer(id)
+		_android_plugin.previous(id)
+
+func set_shuffle(id: int, enabled: bool) -> void:
+	if _android_plugin and players.has(id):
+		_android_plugin.setShuffle(id, enabled)
+
+func get_playlist(id: int) -> Dictionary:
+	return _android_plugin.getPlaylist(id) if _android_plugin and players.has(id) else {}
+
+func get_cache_stats() -> Dictionary:
+	return _android_plugin.getCacheStats() if _android_plugin else {}
+
+## Release all players first. Completion is asynchronous, including rejected operations.
+func remove_cached_media(uri: String) -> void:
+	if uri.is_empty():
+		cache_operation_completed.emit(false, "A media URI is required; use clear_cache to remove everything")
+	elif _android_plugin:
+		_android_plugin.removeCachedMedia(uri)
+
+func clear_cache() -> void:
+	if _android_plugin:
+		_android_plugin.removeCachedMedia("")
 
 func release_player(id:int) -> void:
 	if _android_plugin and players.has(id):
+		_on_player_event(id, "subtitle_cues_detailed", {"cues": []})
+		_on_subtitle_cues(id, [])
 		_android_plugin.pause(id)
 		_release_godot_audio(id)
 		_android_plugin.releaseExoPlayer(id)
@@ -394,6 +496,8 @@ func _setup_godot_audio(id: int, config: Dictionary) -> void:
 		_managed_audio_players[id] = managed_list
 
 func _pump_godot_audio(id: int) -> void:
+	if not bool(players[id].get("native_is_playing", false)):
+		return
 	var players_list = players[id].godot_audio_players
 	if players_list.size() == 0:
 		return
@@ -535,8 +639,10 @@ func _clear_godot_audio_buffer(id: int) -> void:
 		var p = players_list[i]
 		if p != null:
 			p.stop()
-			p.play()
-			playbacks_list[i] = p.get_stream_playback()
+			playbacks_list[i] = null
+			if bool(players[id].get("native_is_playing", false)):
+				p.play()
+				playbacks_list[i] = p.get_stream_playback()
 	if playbacks_list.size() > 0:
 		players[id].godot_audio_playback = playbacks_list[0]
 
@@ -620,6 +726,31 @@ func connect_plugin_signals() -> void:
 		_android_plugin.connect("on_is_playing_changed", _on_is_playing_changed)
 		_android_plugin.connect("on_subtitle_cues", _on_subtitle_cues)
 		_android_plugin.connect("on_media_request_observed", _on_media_request_observed)
+		_android_plugin.connect("on_player_event", _on_player_event)
+
+func _on_player_event(id: int, event: String, data: Dictionary) -> void:
+	if event == "cache_operation_completed":
+		cache_operation_completed.emit(bool(data.get("success", false)), str(data.get("message", "")))
+		return
+	if not players.has(id):
+		return
+	player_event.emit(id, event, data)
+	match event:
+		"live_state_changed": live_state_changed.emit(id, data)
+		"playback_error":
+			players[id].error = data
+			playback_error.emit(id, data)
+		"authentication_required": authentication_required.emit(id, data)
+		"retry_scheduled": retry_scheduled.emit(id, int(data.attempt), int(data.delay_ms))
+		"retry_exhausted": retry_exhausted.emit(id, data)
+		"tracks_changed": tracks_changed.emit(id)
+		"selected_tracks_changed": selected_tracks_changed.emit(id)
+		"subtitle_cues_detailed": subtitle_cues_detailed.emit(id, Array(data.get("cues", [])))
+		"playlist_changed": playlist_changed.emit(id)
+		"media_item_transition":
+			_clear_godot_audio_buffer(id)
+			players[id].media_id = str(data.media_id)
+			media_item_transition.emit(id, str(data.media_id), int(data.index), int(data.reason))
 
 func _on_player_created(id: int) -> void:
 	if players.has(id):
@@ -635,6 +766,7 @@ func _on_player_ready(id: int, duration: int) -> void:
 
 func _on_player_error(id: int, error_message: String) -> void:
 	if players.has(id):
+		players[id].is_ready = false
 		players[id].error = {
 			"message" : error_message,
 			"timestamp": Time.get_ticks_msec()
@@ -649,11 +781,16 @@ func _on_video_end(id: int) -> void:
 func _on_player_state_changed(id: int, state: int) -> void:
 	if players.has(id):
 		players[id].state = state
+		players[id].is_ready = state == STATE_READY
 	emit_signal("player_state_changed", id, state)
 
 func _on_is_playing_changed(id: int, is_playing: bool) -> void:
 	if players.has(id):
 		players[id].native_is_playing = is_playing
+		if is_playing:
+			_play_godot_audio(id)
+		else:
+			_pause_godot_audio(id)
 		if not is_playing:
 			players[id].audio_resync_saturated_since_msec = 0
 
